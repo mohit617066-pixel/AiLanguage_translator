@@ -1,0 +1,69 @@
+!pip install fastapi uvicorn pyngrok transformers sentencepiece torch
+
+
+%%writefile main.py
+from fastapi import FastAPI
+from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
+from transformers import MarianMTModel, MarianTokenizer
+import torch
+
+app = FastAPI()
+
+# CORS FIX (must be before routes)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+SUPPORTED_MODELS = {
+    ("en", "hi"): "Helsinki-NLP/opus-mt-en-hi",
+    ("hi", "en"): "Helsinki-NLP/opus-mt-hi-en",
+}
+
+def translate_text(text, src_lang="en", tgt_lang="hi"):
+    pair = (src_lang, tgt_lang)
+    if pair not in SUPPORTED_MODELS:
+        return f"Not supported: {src_lang}->{tgt_lang}"
+
+    model_name = SUPPORTED_MODELS[pair]
+
+    tokenizer = MarianTokenizer.from_pretrained(model_name)
+    model = MarianMTModel.from_pretrained(model_name)
+
+    inputs = tokenizer(text, return_tensors="pt", padding=True)
+    with torch.no_grad():
+        translated = model.generate(**inputs)
+
+    return tokenizer.decode(translated[0], skip_special_tokens=True)
+
+class TranslateRequest(BaseModel):
+    text: str
+    source_lang: str
+    target_lang: str
+
+@app.post("/translate")
+def t(req: TranslateRequest):
+    r = translate_text(req.text, req.source_lang, req.target_lang)
+    return {"translated_text": r}
+
+
+!nohup uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
+
+from pyngrok import ngrok
+public_url = ngrok.connect(8000)
+public_url
+
+!pip install pyngrok
+from pyngrok import ngrok
+
+ngrok.set_auth_token("35qBwBTutO6JCML4naS6r8ISmU9_3rRRMJvbT2MqEgHB9fDUz")
+
+public_url = ngrok.connect(8000)
+public_url
+
+
+

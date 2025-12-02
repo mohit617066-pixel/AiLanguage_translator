@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Translator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h2>🌍 AI Multi-Language Translator</h2>
+
+        <label>Enter Text:</label>
+        <textarea id="inputText" placeholder="Type text here..."></textarea>
+
+        <label>Source Language:</label>
+        <input id="sourceLang" placeholder="e.g., en, hi, fr">
+
+        <label>Target Language:</label>
+        <input id="targetLang" placeholder="e.g., hi, en, fr">
+
+        <button onclick="translateText()">Translate</button>
+
+        <h3>Translated Output:</h3>
+        <div id="outputBox"></div>
+    </div>
+
+<script src="script.js"></script>
+</body>
+</html>
